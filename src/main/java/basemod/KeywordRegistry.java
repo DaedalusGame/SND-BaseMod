@@ -12,15 +12,36 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 
 public class KeywordRegistry {
-    public static class KeywordRegistrar {
+    public static class KeywordRegistrar implements IEnumPatch<Keyword> {
         public String name;
         public Class[] typeSig;
         public Object[] obj;
-        public Consumer<Object[]> filler;
+        //public Consumer<Object[]> filler;
         public Consumer<Keyword> editor;
+
+        @Override
+        public void edit(Keyword keyword) {
+            if(editor != null) {
+                editor.accept(keyword);
+            }
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public Class[] getTypeSignature() {
+            return typeSig;
+        }
+
+        @Override
+        public Object[] getParameters() {
+            return obj;
+        }
     }
 
-    public static ArrayList<KeywordRegistrar> registry = new ArrayList<>();
     public static EnumRegistry<Keyword, IOnUseEffect> onUseEffects = new EnumRegistry<>();
     public static EnumRegistry<Keyword, IOnKillEffect> onKillEffects = new EnumRegistry<>();
     public static EnumRegistry<Keyword, IOnRescueEffect> onRescueEffects = new EnumRegistry<>();
@@ -28,12 +49,16 @@ public class KeywordRegistry {
     public static EnumRegistry<Keyword, IKeywordUsable> keywordUsableRegistry = new EnumRegistry<>();
     public static EnumRegistry<Keyword, IKeywordColorTag> colorTagRegistry = new EnumRegistry<>();
 
+    private static void register(KeywordRegistrar registrar) {
+        EnumPatcher.registerPatch(Keyword.class, registrar);
+    }
+
     public static void registerEnumPair(String name, int num) {
         KeywordRegistrar keyword = new KeywordRegistrar();
         keyword.name = name;
         keyword.typeSig = new Class[] { int.class };
         keyword.obj = new Object[] { num };
-        registry.add(keyword);
+        register(keyword);
     }
 
     public static void registerEnumMeta(String name, LazyKeyword keywordA, LazyKeyword keywordB, KeywordCombineType combineType)
@@ -41,12 +66,12 @@ public class KeywordRegistry {
         KeywordRegistrar keyword = new KeywordRegistrar();
         keyword.name = name;
         keyword.typeSig = new Class[] { Keyword.class, Keyword.class, KeywordCombineType.class };
-        keyword.obj = new Object[]{null, null, combineType};
-        keyword.filler = objects -> {
+        keyword.obj = new Object[]{keywordA, keywordB, combineType};
+        /*keyword.filler = objects -> {
             objects[0] = Keyword.byName(keywordA.name);
             objects[1] = Keyword.byName(keywordB.name);
-        };
-        registry.add(keyword);
+        };*/
+        register(keyword);
     }
 
     public static void registerGroup(String name, LazyKeyword kw, boolean side) {
@@ -60,7 +85,7 @@ public class KeywordRegistry {
                 kw,
                 side
         };
-        registry.add(keyword);
+        register(keyword);
     }
 
     public static void registerBasic(String name, Color color, String rules, String extraRules, KeywordAllowType allowType) {
@@ -78,7 +103,7 @@ public class KeywordRegistry {
                 extraRules,
                 allowType
         };
-        registry.add(keyword);
+        register(keyword);
     }
 
     public static void registerConditionalRequirement(String name, Color color, String rules, String extraRules, LazyS<ConditionalRequirement> targettingRequirement) {
@@ -96,7 +121,7 @@ public class KeywordRegistry {
                 extraRules,
                 targettingRequirement
         };
-        registry.add(keyword);
+        register(keyword);
     }
 
     public static void registerConditionalBonus(String name, Color color, String rules, String extraRules, LazyS<ConditionalBonus> bonus, Consumer<Keyword> editor) {
@@ -115,7 +140,7 @@ public class KeywordRegistry {
                 bonus
         };
         keyword.editor = editor;
-        registry.add(keyword);
+        register(keyword);
     }
 
     public static void registerMinus(String name, LazyKeyword swapKeyword) {
@@ -129,7 +154,7 @@ public class KeywordRegistry {
                 swapKeyword,
                 1.0f,
         };
-        registry.add(keyword);
+        register(keyword);
     }
 
     public static void registerSwap(String name, LazyKeyword swapKeyword) {
@@ -143,7 +168,7 @@ public class KeywordRegistry {
                 swapKeyword,
                 new int[0],
         };
-        registry.add(keyword);
+        register(keyword);
     }
 
     public static void registerSelf(String name, LazyKeyword swapKeyword) {
@@ -157,6 +182,6 @@ public class KeywordRegistry {
                 swapKeyword,
                 new long[0],
         };
-        registry.add(keyword);
+        register(keyword);
     }
 }

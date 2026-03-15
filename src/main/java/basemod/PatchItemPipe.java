@@ -1,6 +1,8 @@
 package basemod;
 
+import basemod.util.PipeHandler;
 import com.bord.dice.modthedice.lib.SpirePatch2;
+import com.tann.dice.gameplay.content.gen.pipe.entity.hero.PipeHero;
 import com.tann.dice.gameplay.content.gen.pipe.item.PipeItem;
 import com.tann.dice.gameplay.content.item.Item;
 import basemod.pipes.*;
@@ -16,8 +18,12 @@ public class PatchItemPipe {
     public static void Postfix() {
         System.out.println("Patching PipeItem!!");
 
-        for (IInitializeItemPipes heroPipe : BaseMod.itemPipes) {
-            heroPipe.initialize();
+        PipeHandler handler = PipeHandler.make(() -> PipeItem.pipes);
+
+        handler.setBaseGame();
+        for (BaseMod.ModSpecific<IInitializeItemPipes> heroPipe : BaseMod.itemPipes) {
+            heroPipe.content.initialize();
+            handler.setMod(heroPipe.modInfo);
         }
     }
 
@@ -29,8 +35,8 @@ public class PatchItemPipe {
         public static List<Item> Postfix(List<Item> __result) {
             ArrayList<Item> list = new ArrayList<Item>(__result);
 
-            for (IInitializeItemPipes heroPipe : BaseMod.itemPipes) {
-                heroPipe.modifyHiddenModifiers(list);
+            for (BaseMod.ModSpecific<IInitializeItemPipes> heroPipe : BaseMod.itemPipes) {
+                heroPipe.content.modifyHiddenModifiers(list);
             }
 
             return list;

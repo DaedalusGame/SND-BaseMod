@@ -12,9 +12,35 @@ import javassist.ClassPool;
 import basemod.conditionalBonus.ConditionalBonusTypeRegistry;
 
 import java.lang.reflect.Field;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class EnumPatcher {
+    public static class PatchList<T> {
+        public Class<T> type;
+        public List<IEnumPatch<T>> patches = new ArrayList<>();
+
+        public PatchList(Class<T> type) {
+            this.type = type;
+        }
+
+        public void add(IEnumPatch<T> patch) {
+            patches.add(patch);
+        }
+
+        public void apply(ClassLoader loader, Map<Class<?>, EnumBusterReflect> enumBusterMap) {
+            System.out.println("Patching "+type);
+
+            for (IEnumPatch<T> patch : patches) {
+                try {
+                    ab(type, loader, enumBusterMap, patch);
+                } catch (IllegalAccessException | NoSuchFieldException | ClassNotFoundException e) {
+                    //NOOP
+                }
+            }
+        }
+    }
+
     public enum DUMMY {
         AMOGUS,
         SUS
@@ -39,10 +65,30 @@ public class EnumPatcher {
         }
     }
 
+    private static Map<Class, PatchList> patchLists = new HashMap<>();
+
+    private static Map<Class, Float> sortOrder = new HashMap<>();
+
+    public static <T extends Enum<?>> void registerSortOrder(Class<T> type, float order) {
+        sortOrder.put(type, order);
+    }
+
+    public static <T extends Enum<?>> void registerPatch(Class<T> type, IEnumPatch<T> patch) {
+        PatchList<T> patchList = patchLists.getOrDefault(type, null);
+        if(patchList == null){
+            patchList = new PatchList<>(type);
+            patchLists.put(type,patchList);
+        }
+        patchList.add(patch);
+    }
+
     public static void initialize() {
         try {
             Field poolField = Loader.class.getDeclaredField("POOL");
             poolField.setAccessible(true);
+
+            registerSortOrder(ConditionalBonusType.class, 50f);
+            registerSortOrder(Keyword.class, 100f);
 
             generate((ClassPool) poolField.get(null));
         } catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
@@ -58,10 +104,12 @@ public class EnumPatcher {
         }
     }
 
-    private static void a(ClassLoader loader, Map<Class<?>, EnumBusterReflect> enumBusterMap, ConditionalBonusTypeRegistry.ConditionalBonusTypeRegistrar keyword)
+    private static <T> void ab(Class<T> type, ClassLoader loader, Map<Class<?>, EnumBusterReflect> enumBusterMap, IEnumPatch<T> enumPatch)
             throws IllegalAccessException, NoSuchFieldException, ClassNotFoundException
     {
-        Class type = ConditionalBonusType.class;//field.getType();
+        String name = enumPatch.getName();
+        System.out.println("Add enum: "+name);
+
         EnumBusterReflect buster;
         if (enumBusterMap.containsKey(type)) {
             buster = enumBusterMap.get(type);
@@ -69,77 +117,16 @@ public class EnumPatcher {
             buster = new EnumBusterReflect(loader, type);
             enumBusterMap.put(type, buster);
         }
-        Enum<?> enumValue = buster.make(keyword.name, Keyword.values().length);
+        Object[] parameters = enumPatch.getParameters();
+        flattenLazies(parameters);
+        Enum<?> enumValue = buster.make(name, Keyword.values().length, enumPatch.getTypeSignature(), parameters);
+        enumPatch.edit((T)enumValue);
         buster.addByValue(enumValue);
         try {
-            Field constantField = type.getField(keyword.name);
+            Field constantField = type.getField(name);
             ReflectionHelper.setStaticFinalField(constantField, enumValue);
         } catch (NoSuchFieldException ignored) {
-            System.out.println("\t\t- Failed to initialize enum field " + keyword.name);
-        }
-
-        //field.setAccessible(true);
-        //field.set(null, enumValue);
-    }
-
-    private static void a(ClassLoader loader, Map<Class<?>, EnumBusterReflect> enumBusterMap, SpecificSidesTypeRegistry.SpecificSidesTypeRegistrar keyword)
-            throws IllegalAccessException, NoSuchFieldException, ClassNotFoundException
-    {
-        Class[] sig = new Class[] {
-            int[].class, TextureRegion.class, Vector2[].class, String.class, String.class
-        };
-
-        Class type = SpecificSidesType.class;//field.getType();
-        EnumBusterReflect buster;
-        if (enumBusterMap.containsKey(type)) {
-            buster = enumBusterMap.get(type);
-        } else {
-            buster = new EnumBusterReflect(loader, type);
-            enumBusterMap.put(type, buster);
-        }
-        Object[] obj = new Object[]{
-                keyword.sideIndices, keyword.texture, keyword.sidePositions, keyword.description, keyword.shortName
-        };
-        flattenLazies(obj);
-        Enum<?> enumValue = buster.make(keyword.name, Keyword.values().length, sig, obj);
-        buster.addByValue(enumValue);
-        try {
-            Field constantField = type.getField(keyword.name);
-            ReflectionHelper.setStaticFinalField(constantField, enumValue);
-        } catch (NoSuchFieldException ignored) {
-            System.out.println("\t\t- Failed to initialize enum field " + keyword.name);
-        }
-
-        //field.setAccessible(true);
-        //field.set(null, enumValue);
-    }
-
-
-    private static void a(ClassLoader loader, Map<Class<?>, EnumBusterReflect> enumBusterMap, KeywordRegistry.KeywordRegistrar keyword)
-            throws IllegalAccessException, NoSuchFieldException, ClassNotFoundException
-    {
-        Class type = Keyword.class;//field.getType();
-        EnumBusterReflect buster;
-        if (enumBusterMap.containsKey(type)) {
-            buster = enumBusterMap.get(type);
-        } else {
-            buster = new EnumBusterReflect(loader, type);
-            enumBusterMap.put(type, buster);
-        }
-        if(keyword.filler != null) {
-            keyword.filler.accept(keyword.obj);
-        }
-        flattenLazies(keyword.obj);
-        Enum<?> enumValue = buster.make(keyword.name, Keyword.values().length, keyword.typeSig, keyword.obj);
-        if(keyword.editor != null) {
-            keyword.editor.accept((Keyword) enumValue);
-        }
-        buster.addByValue(enumValue);
-        try {
-            Field constantField = type.getField(keyword.name);
-            ReflectionHelper.setStaticFinalField(constantField, enumValue);
-        } catch (NoSuchFieldException ignored) {
-            System.out.println("\t\t- Failed to initialize enum field " + keyword.name);
+            System.out.println("\t\t- Failed to initialize enum field " + name);
         }
 
         //field.setAccessible(true);
@@ -160,7 +147,23 @@ public class EnumPatcher {
         Map<Class<?>, EnumBusterReflect> enumBusterMap = (Map<Class<?>, EnumBusterReflect>) enumBusterMapField.get(null);
         //Class<?> enumStorage = duospire.patches.gen.EnumPlace.class; //loader.loadClass(EnumPlace.class.getName());
 
-        for (ConditionalBonusTypeRegistry.ConditionalBonusTypeRegistrar conditionalBonusType : ConditionalBonusTypeRegistry.registry) {
+        List<PatchList> sortedPatches = patchLists.values()
+                .stream()
+                .sorted(new Comparator<PatchList>() {
+                    @Override
+                    public int compare(PatchList o1, PatchList o2) {
+                        return Float.compare(
+                                sortOrder.getOrDefault(o1.type, 0f),
+                                sortOrder.getOrDefault(o2.type, 0f)
+                        );
+                    }
+                })
+                .collect(Collectors.toList());
+        for (PatchList patchList : sortedPatches) {
+            patchList.apply(loader, enumBusterMap);
+        }
+
+        /*for (ConditionalBonusTypeRegistry.ConditionalBonusTypeRegistrar conditionalBonusType : ConditionalBonusTypeRegistry.registry) {
             a(loader, enumBusterMap, conditionalBonusType);
         }
 
@@ -170,7 +173,7 @@ public class EnumPatcher {
 
         for (SpecificSidesTypeRegistry.SpecificSidesTypeRegistrar keyword : SpecificSidesTypeRegistry.registry) {
             a(loader, enumBusterMap, keyword);
-        }
+        }*/
 
         /*for (Field field : enumStorage.getDeclaredFields()) {
             if (Modifier.isStatic(field.getModifiers())) {
