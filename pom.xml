@@ -4,9 +4,9 @@
     <groupId>UnimportantInfo</groupId>
 
     <artifactId>BaseMod</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
     <name>Base Mod</name>
-    <description>TODO: Change this description</description>
+    <description>Library for modifying Slice and Dice Content</description>
     <!-- Change the above for mod information. -->
 
     <properties>
