@@ -6,5 +6,5 @@ import com.tann.dice.screens.dungeon.panels.book.page.ledgerPage.LedgerPage;
 public interface ILedgerPageType {
     String getName(LedgerPage.LedgerPageType type);
 
-    Actor getActor(int contentWidth);
+    Actor getActor(int contentWidth, LedgerPage ledgerPage);
 }

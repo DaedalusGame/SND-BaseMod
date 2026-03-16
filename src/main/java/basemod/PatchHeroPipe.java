@@ -22,7 +22,7 @@ public class PatchHeroPipe {
         System.out.println("Patching PipeHero!!");
         List<HeroType> heroList = makeHiddenHeroes();
         if(heroList.size() > 0) {
-            PipeHero.pipes.add(new PipeMaster<>(heroList));
+            PipeHero.pipes.add(new PipeMasterHidden<>(heroList));
         }
 
         PipeHandler handler = PipeHandler.make(() -> PipeHero.pipes);

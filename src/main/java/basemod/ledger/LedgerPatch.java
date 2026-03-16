@@ -8,11 +8,11 @@ import com.tann.dice.screens.dungeon.panels.book.page.ledgerPage.LedgerPage;
 public class LedgerPatch {
     @SpirePatch2(clz = LedgerPage.class, method = "getContentActorFromSidebar")
     public static class GetContentActor {
-        public static SpireReturn<Actor> Prefix(Object type, int contentWidth) {
+        public static SpireReturn<Actor> Prefix(LedgerPage __instance, Object type, int contentWidth) {
             if(type instanceof LedgerPage.LedgerPageType) {
                 ILedgerPageType func = LedgerPageTypeRegistry.getLedgerPageType((LedgerPage.LedgerPageType) type);
                 if (func != null) {
-                    return SpireReturn.Return(func.getActor(contentWidth));
+                    return SpireReturn.Return(func.getActor(contentWidth, __instance));
                 }
             }
             return SpireReturn.Continue();
