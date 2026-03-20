@@ -27,6 +27,6 @@ public interface IKeywordValueCalculator {
     }
 
     default Boolean allowForSpell(Keyword k) {
-        return false;
+        return null;
     }
 }

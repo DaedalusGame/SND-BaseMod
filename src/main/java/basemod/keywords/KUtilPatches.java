@@ -10,6 +10,7 @@ import com.tann.dice.gameplay.effect.eff.Eff;
 import com.tann.dice.gameplay.effect.eff.keyword.KUtils;
 import basemod.EnumPatcher;
 import com.tann.dice.gameplay.effect.eff.keyword.Keyword;
+import com.tann.dice.gameplay.effect.targetable.ability.spell.SpellUtils;
 
 public class KUtilPatches {
     @SpirePatch2(
@@ -91,7 +92,7 @@ public class KUtilPatches {
         }
     }
 
-    @SpirePatch2(clz = KUtils.class, method = "allowAddingKeyword")
+    @SpirePatch2(clz = SpellUtils.class, method = "allowAddingKeyword")
     public static class SpellAllowAddingKeyword {
         public static SpireReturn<Boolean> Prefix(Keyword k) {
             IKeywordValueCalculator calc = KeywordRegistry.valueCalculatorRegistry.get(k);
