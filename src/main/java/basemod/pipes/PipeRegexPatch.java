@@ -23,7 +23,7 @@ public class PipeRegexPatch {
             public void edit(FieldAccess f) throws CannotCompileException {
                 if(f.getFieldName().equals("numGroups")) {
                     f.replace("{" +
-                            "$_ = yourmod.pipes.PipeRegexPatch.getNumGroups(this, $proceed($$));" +
+                            "$_ = basemod.pipes.PipeRegexPatch.getNumGroups(this, $proceed($$));" +
                             "}");
                 }
             }

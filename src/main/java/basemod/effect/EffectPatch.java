@@ -54,7 +54,7 @@ public class EffectPatch {
                 public void edit(MethodCall m) throws CannotCompileException {
                     if(m.getMethodName().equals("getType")) {
                         m.replace("{" +
-                                "yourmod.effect.EffectPatch.untargetedUse(this,e,source);" +
+                                "basemod.effect.EffectPatch.untargetedUse(this,e,source);" +
                                 "$_ = $proceed($$);" +
                                 "}");
                     }
@@ -71,7 +71,7 @@ public class EffectPatch {
                 public void edit(MethodCall m) throws CannotCompileException {
                     if(m.getMethodName().equals("activateOnUseKeywords")) {
                         m.replace("{" +
-                                "yourmod.effect.EffectPatch.hit(this,eff,source,targetable);" +
+                                "basemod.effect.EffectPatch.hit(this,eff,source,targetable);" +
                                 "$_ = $proceed($$);" +
                                 "}");
                     }
