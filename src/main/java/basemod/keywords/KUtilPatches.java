@@ -84,9 +84,9 @@ public class KUtilPatches {
     @SpirePatch2(clz = KUtils.class, method = "allowAutoskip")
     public static class AllowAutoskip {
         public static SpireReturn<Boolean> Prefix(Keyword k) {
-            IKeywordValueCalculator calc = KeywordRegistry.valueCalculatorRegistry.get(k);
+            Boolean calc = KeywordRegistry.allowedAutoSkip.get(k);
             if(calc != null) {
-                return SpireReturn.Return(calc.allowAutoskip(k));
+                return SpireReturn.Return(calc);
             }
             return SpireReturn.Continue();
         }
@@ -95,12 +95,9 @@ public class KUtilPatches {
     @SpirePatch2(clz = SpellUtils.class, method = "allowAddingKeyword")
     public static class SpellAllowAddingKeyword {
         public static SpireReturn<Boolean> Prefix(Keyword k) {
-            IKeywordValueCalculator calc = KeywordRegistry.valueCalculatorRegistry.get(k);
+            Boolean calc = KeywordRegistry.allowedForSpells.get(k);
             if(calc != null) {
-                Boolean res = calc.allowForSpell(k);
-                if(res != null) {
-                    return SpireReturn.Return(res);
-                }
+                return SpireReturn.Return(calc);
             }
             return SpireReturn.Continue();
         }

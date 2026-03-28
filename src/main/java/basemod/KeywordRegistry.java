@@ -49,6 +49,8 @@ public class KeywordRegistry {
     public static EnumRegistry<Keyword, IKeywordUsable> keywordUsableRegistry = new EnumRegistry<>();
     public static EnumRegistry<Keyword, IKeywordColorTag> colorTagRegistry = new EnumRegistry<>();
     public static EnumRegistry<Keyword, IKeywordValueCalculator> valueCalculatorRegistry = new EnumRegistry<>();
+    public static EnumRegistry<Keyword, Boolean> allowedForSpells = new EnumRegistry<>();
+    public static EnumRegistry<Keyword, Boolean> allowedAutoSkip = new EnumRegistry<>();
 
     private static void register(KeywordRegistrar registrar) {
         EnumPatcher.registerPatch(Keyword.class, registrar);

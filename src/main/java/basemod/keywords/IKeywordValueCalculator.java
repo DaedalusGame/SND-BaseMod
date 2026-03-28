@@ -21,12 +21,4 @@ public interface IKeywordValueCalculator {
     default float getModTier(Keyword k, boolean hero) {
         return 0;
     }
-
-    default boolean allowAutoskip(Keyword k) {
-        return false;
-    }
-
-    default Boolean allowForSpell(Keyword k) {
-        return null;
-    }
 }

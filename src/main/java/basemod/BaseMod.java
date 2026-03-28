@@ -1,5 +1,6 @@
 package basemod;
 
+import basemod.content.*;
 import basemod.keywords.IKeywordInitializer;
 import basemod.ledger.ILedgerPageType;
 import basemod.ledger.LedgerPageTypeRegistry;
@@ -30,38 +31,63 @@ public class BaseMod {
         }
     }
 
-    static List<ModSpecific<IKeywordInitializer>> keywordInitializers = new ArrayList<>();
-    public static List<ModSpecific<IInitializeItemPipes>> itemPipes = new ArrayList<>();
-    public static List<ModSpecific<IInitializeModPipes>> modPipes = new ArrayList<>();
-    public static List<ModSpecific<IInitializeHeroPipes>> heroPipes = new ArrayList<>();
-    public static List<ModSpecific<IInitializeMonsterPipes>> monsterPipes = new ArrayList<>();
+    static ModSpecificList<IKeywordInitializer> keywordInitializers = new ModSpecificList<>();
+    public static ModSpecificList<IInitializeItemPipes> itemPipes = new ModSpecificList<>();
+    public static ModSpecificList<IInitializeModPipes> modPipes = new ModSpecificList<>();
+    public static ModSpecificList<IInitializeHeroPipes> heroPipes = new ModSpecificList<>();
+    public static ModSpecificList<IInitializeMonsterPipes> monsterPipes = new ModSpecificList<>();
+
+    public static ModSpecificList<IInitializeAbilities> abilities = new ModSpecificList<>();
+    public static ModSpecificList<IInitializeHeroTypes> heroTypes = new ModSpecificList<>();
+    public static ModSpecificList<IInitializeMonsterTypes> monsterTypes = new ModSpecificList<>();
+    public static ModSpecificList<IInitializeItems> items = new ModSpecificList<>();
+    public static ModSpecificList<IInitializeModifiers> modifiers = new ModSpecificList<>();
 
     public static void initialize() {
-        System.out.println("Hello world!");
     }
 
     public static void register(IKeywordInitializer initializer) {
-        keywordInitializers.add(new ModSpecific<>(Loader.getCurrentMod(), initializer));
+        keywordInitializers.add(initializer);
     }
 
     public static void register(IInitializeItemPipes initializer) {
-        itemPipes.add(new ModSpecific<>(Loader.getCurrentMod(), initializer));
+        itemPipes.add(initializer);
     }
 
     public static void register(IInitializeModPipes initializer) {
-        modPipes.add(new ModSpecific<>(Loader.getCurrentMod(), initializer));
+        modPipes.add(initializer);
     }
 
     public static void register(IInitializeHeroPipes initializer) {
-        heroPipes.add(new ModSpecific<>(Loader.getCurrentMod(), initializer));
+        heroPipes.add(initializer);
     }
 
     public static void register(IInitializeMonsterPipes initializer) {
-        monsterPipes.add(new ModSpecific<>(Loader.getCurrentMod(), initializer));
+        monsterPipes.add(initializer);
+    }
+
+    public static void register(IInitializeAbilities initializer) {
+        abilities.add(initializer);
+    }
+
+    public static void register(IInitializeHeroTypes initializer) {
+        heroTypes.add(initializer);
+    }
+
+    public static void register(IInitializeMonsterTypes initializer) {
+        monsterTypes.add(initializer);
+    }
+
+    public static void register(IInitializeItems initializer) {
+        items.add(initializer);
+    }
+
+    public static void register(IInitializeModifiers initializer) {
+        modifiers.add(initializer);
     }
 
     public static void runKeywordInitializers() {
-        for (ModSpecific<IKeywordInitializer> keywordInitializer: keywordInitializers) {
+        for (ModSpecific<IKeywordInitializer> keywordInitializer: keywordInitializers.getAll()) {
             keywordInitializer.content.initialize();
         }
     }
