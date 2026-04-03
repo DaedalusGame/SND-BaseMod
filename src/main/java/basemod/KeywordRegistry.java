@@ -1,12 +1,16 @@
 package basemod;
 
+import basemod.targeting.ICanTargetBackrow;
+import basemod.targeting.TargetingRegistry;
 import com.badlogic.gdx.graphics.Color;
+import com.tann.dice.gameplay.effect.eff.Eff;
 import com.tann.dice.gameplay.effect.eff.conditionalBonus.ConditionalBonus;
 import com.tann.dice.gameplay.effect.eff.conditionalBonus.conditionalRequirement.ConditionalRequirement;
 import com.tann.dice.gameplay.effect.eff.keyword.Keyword;
 import com.tann.dice.gameplay.effect.eff.keyword.KeywordAllowType;
 import com.tann.dice.gameplay.effect.eff.keyword.KeywordCombineType;
 import basemod.keywords.*;
+import com.tann.dice.gameplay.fightLog.EntState;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -51,6 +55,10 @@ public class KeywordRegistry {
     public static EnumRegistry<Keyword, IKeywordValueCalculator> valueCalculatorRegistry = new EnumRegistry<>();
     public static EnumRegistry<Keyword, Boolean> allowedForSpells = new EnumRegistry<>();
     public static EnumRegistry<Keyword, Boolean> allowedAutoSkip = new EnumRegistry<>();
+
+    public static void allowTargetBackRow(LazyKeyword keyword) {
+        TargetingRegistry.register((eff, source, target) -> eff.hasKeyword((Keyword) keyword.get()));
+    }
 
     private static void register(KeywordRegistrar registrar) {
         EnumPatcher.registerPatch(Keyword.class, registrar);

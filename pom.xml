@@ -4,7 +4,7 @@
     <groupId>UnimportantInfo</groupId>
 
     <artifactId>BaseMod</artifactId>
-    <version>0.0.7</version>
+    <version>0.0.8</version>
     <name>Base Mod</name>
     <description>Library for modifying Slice and Dice Content</description>
     <!-- Change the above for mod information. -->
